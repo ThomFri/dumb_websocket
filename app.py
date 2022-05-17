@@ -8,11 +8,10 @@ import copy
 
 
 app = Flask(__name__)
+application = app #for wsgi
 app.config.from_object('config')
 socketio = SocketIO(app, async_mode=None)
 sock = Sock(app)
-
-application = socketio
 
 to_hide_keys = ["actions", "actions_data", "intents", "intents_data"]
 
