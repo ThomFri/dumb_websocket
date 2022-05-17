@@ -1,9 +1,15 @@
 window.onload = function() {
-    const ws_url = findGetParameter("ws_url") //'ws://localhost:3000/cbws';
+    const ws_status = document.getElementById('ws_status');
+    const ws_url_ = document.getElementById('ws_url');
     const chat_form = document.getElementById('chat_form');
     const chat_field = document.getElementById('chat_field');
     const chat_log = document.getElementById('chat_log');
 
+    const ws_url = findGetParameter("ws_url") //'ws://localhost:3000/cbws';
+    if(ws_url == null) {
+        alert('Please specify ws_url as GET param! (e.g. "chat.html?ws_url=ws://localhost:3000/cbws"');
+    }
+    ws_url_.innerHTML = ws_url;
     const ws_prefix =  "WS: ";
     const ws_class = "ws_message";
     const user_prefix = "You: ";
@@ -26,13 +32,16 @@ window.onload = function() {
     // init WebSocket
     const socket = new WebSocket(ws_url);
     socket.onopen = function(evt) {
-        console.log('WS connected');
+        ws_status.innerHTML = 'WS connected'
+        ws_status.style.backgroundColor = 'greenyellow';
     };
     socket.onclose = function(evt) {
-        alert("WS closed; please reload page!");
+        ws_status.innerHTML = 'WS closed; please reload page!'
+        ws_status.style.backgroundColor = 'red';
     };
     socket.onerror = function(evt) {
-        alert("WS error; please reload page!");
+        ws_status.innerHTML = 'WS error; please reload page!'
+        ws_status.style.backgroundColor = 'red';
     };
 
 
