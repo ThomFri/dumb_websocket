@@ -78,7 +78,7 @@ def get_further_data(data, intents):
 
 @app.route('/')
 def display_chat():
-    return f'WebSocket implementation only; Get GUI from <a href="https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/ThomFri/dumb_websocket/tree/master/static">GitHub</a>'
+    return f'WebSocket implementation only; Get GUI from <a href="https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/ThomFri/dumb_websocket/tree/master/static&fileName=UNZIPME">GitHub</a>'
 
 @sock.route('/cbws')
 def receive_input(sock):  # put application's code here
