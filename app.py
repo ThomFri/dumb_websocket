@@ -113,7 +113,7 @@ def evaluate_input(sock, request_data):
 
 
 def lookup(sock):
-    sleep(3) # not working yet!
+    #sleep(3) # not working yet!
     data = {
         "message": "I looked it up! ;)",
         "events": [],
