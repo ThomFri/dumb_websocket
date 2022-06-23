@@ -1,10 +1,13 @@
+import os
 from asyncio import sleep
 
-from flask import Flask, send_from_directory
+from flask import Flask, send_from_directory, send_file, redirect
 from flask_sock import Sock
 from flask_socketio import SocketIO
 import json
 import copy
+from collections import OrderedDict
+from operator import getitem
 
 
 app = Flask(__name__)
@@ -13,7 +16,7 @@ app.config.from_object('config')
 socketio = SocketIO(app, async_mode=None)
 sock = Sock(app)
 
-to_hide_keys = ["actions", "actions_data", "intents", "intents_data"]
+to_hide_keys = ["actions", "intents"]
 
 def convert_json(data, make_json=True):
     was_json = False
@@ -33,52 +36,131 @@ def convert_json(data, make_json=True):
 
 def get_intentions(data):
     intentions = {}
-    intentions_data = {}
-    user_message = data.get("message")
 
-    if "close" in user_message:
-        intentions["close"] = 1.0
-    elif "lookup" in user_message:
-        intentions["lookup"] = 1.0
+    message = data.get("message")
+    message_type = message.get("type")
+
+    if message_type == "text_message":
+        message_text = message.get("text")
+
+        if "hi" in message_text or "hello" in message_text:
+            intentions["greeting"] = {"probability": 1.0}
+        if "close" in message_text or "bye" in message_text:
+            intentions["close"] = {"probability": 1.0}
+        elif "lookup" in message_text:
+            intentions["lookup"] = {"probability": 1.0}
+        elif "audio" in message_text:
+            intentions["audio"] = {"probability": 1.0}
+        elif "picture" in message_text:
+            intentions["picture"] = {"probability": 1.0}
+        else:
+            intentions["unknown"] = {"probability": 1.0}
+
     else:
-        intentions["unknown"] = 1.0
+        intentions["not_supported"] = {"probability": 1.0}
 
-    intentions = {k: v for k, v in sorted(intentions.items(), key=lambda item: item[1], reverse=True)}
-    return intentions, intentions_data
+    intentions = OrderedDict(sorted(intentions.items(), key = lambda x: getitem(x[1], 'probability')))
+
+    return intentions
+
+def get_message(data, intents):
+    if "unknown" in intents or "close" in intents or "lookup" in intents:
+        text_message = get_text_answer(data, intents)
+
+        result = {
+            "type": "text_message",
+            "text": text_message
+        }
+
+    elif "picture" in intents:
+        picture, img_type = get_picture(data, intents)
+
+        result = {
+            "type": "picture",
+            "url": picture,
+            "file_type": img_type
+        }
+
+    elif "audio" in intents:
+        audio, audio_type = get_audio(data, intents)
+
+        result = {
+            "type": "audio",
+            "url": audio,
+            "file_type": audio_type
+        }
+
+    else:
+        result = {
+            "type": "unknown"
+        }
+
+    return result
 
 
-def get_answer(data, intents):
-    user_message = data.get("message")
-    return f'Message "{user_message}" received!'
+def get_text_answer(data, intents):
+    user_message = data.get("message").get("text")
 
+    if "greeting" in intents:
+        return f'Hi 😊'
+
+    if "close" in intents:
+        return f'Ok, bye 😢\nI\'m closing the chat... '
+
+    elif "lookup" in intents:
+        return f'Let me look this up... 🧐'
+
+    else:
+        return f'Message "{user_message}" received!'
+
+
+def get_picture(data, intents):
+    url = "picture.jpg"
+    file_type = 'image/jpeg'
+
+    return url, file_type
+
+
+def get_audio(data, intents):
+    url = "audio.wav"
+    file_type = 'audio/wav'
+
+    return url, file_type
+
+
+def get_binary(path):
+    file = send_from_directory("resources", path).response.file
+    result = file.read().decode('utf_32')
+
+    return result
 
 def get_actions(data, intents):
-    actions = []
-    actions_data = {}
+    actions = {}
 
     if "lookup" in intents:
-        actions.append("lookup")
-        actions_data["lookup"] = {}
+        actions["lookup"] = {}
 
-    return actions, actions_data
+    return actions
 
 
 def get_events(data, intents):
-    events = []
-    events_data = {}
+    events = {}
 
     if "close" in intents:
-        events.append("close")
+        events["close"] = {}
 
-    return events, events_data
+    return events
 
 
 def get_further_data(data, intents):
-    return []
+    return {}
 
-@app.route('/')
-def display_chat():
-    return f'WebSocket implementation only; Get GUI from <a href="https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/ThomFri/dumb_websocket/tree/master/static&fileName=UNZIPME">GitHub</a>'
+
+@app.route('/resources/<path:path>', methods=['GET'])
+def get_resourcs_file(path):
+    fullpath = f'resources/{path}'
+    return send_file(fullpath)
+
 
 @sock.route('/cbws')
 def receive_input(sock):  # put application's code here
@@ -92,21 +174,18 @@ def receive_input(sock):  # put application's code here
 def evaluate_input(sock, request_data):
     # evaluate received data
     request_data, is_json = convert_json(request_data)
-    intents, intents_data = get_intentions(request_data)
-    actions, actions_data = get_actions(request_data, intents)
-    events, events_data   = get_events(request_data, intents)
-    answer                = get_answer(request_data, intents)
+    intents               = get_intentions(request_data)
+    actions               = get_actions(request_data, intents)
+    events                = get_events(request_data, intents)
+    message               = get_message(request_data, intents)
     further_data          = get_further_data(request_data, intents)
 
     # send response to browser
     response_data = {
-        "message": answer,
+        "message": message,
         "intents": intents,
-        "intents_data": intents_data,
         "actions": actions,
-        "actions_data": actions_data,
         "events": events,
-        "events_data": events_data,
         "further_data": further_data
     }
     perform_actions(sock, response_data)
@@ -115,10 +194,14 @@ def evaluate_input(sock, request_data):
 def lookup(sock):
     #sleep(3) # not working yet!
     data = {
-        "message": "I looked it up! ;)",
-        "events": [],
-        "events_data": {},
-        "further_data": []
+        "message": {
+            "type": "text_message",
+            "text": "I looked it up! 😉"
+        },
+        "events": {},
+        "intents": {},
+        "actions": {},
+        "further_data": {}
     }
 
     send_to_user(sock, data)

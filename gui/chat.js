@@ -2,6 +2,7 @@
     let ele_ws_status;
     let ele_ws_url;
     let ele_ws_json;
+    let ele_ws_events;
     let ele_chat_form;
     let ele_chat_field;
     let ele_chat_log;
@@ -9,12 +10,16 @@
 // ws vars
     let socket;
     let ws_url;
+    let res_url;
 
 // chat vars
     const chat_ws_prefix =  "WS: ";
     const chat_ws_class = "ws_message";
     const chat_user_prefix = "You: ";
     const chat_user_class = "you_message";
+    const chat_image_class = "chat_image";
+    const chat_audio_class = "chat_audio";
+    const chat_bling = "ding.wav";
 
 // debug vars
     const verbose = 1;
@@ -45,7 +50,9 @@
         }
         ele_ws_status = document.getElementById('ws_status');
         ele_ws_url = document.getElementById('ws_url');
+        ele_res_url = document.getElementById('res_url');
         ele_ws_json = document.getElementById('ws_json');
+        ele_ws_events = document.getElementById('ws_events');
         ele_chat_form = document.getElementById('chat_form');
         ele_chat_field = document.getElementById('chat_field');
         ele_chat_log = document.getElementById('chat_log');
@@ -57,6 +64,14 @@
             alert('Please specify ws_url as GET param! (e.g. "chat.html?ws_url=ws://localhost:3000/cbws"');
         }
         ele_ws_url.innerHTML = ws_url;
+
+        // get res url from url
+        res_url = findGetParameter("res_url")
+        if (ws_url == null) {
+            console.warn("res_url not defined as GET param!");
+            alert('Please specify ws_url as GET param! (e.g. "chat.html? ... &res_url=http://localhost:3000/resources/"');
+        }
+        ele_res_url.innerHTML = res_url;
 
         // connect ws
         ele_ws_status.innerHTML = `WS is connecting...`;
@@ -119,6 +134,8 @@
         if(verbose>0){console.log("WS received message:");console.log(response_data);}
 
         ele_ws_json.innerHTML = event.data;
+        ele_ws_events.innerHTML = JSON.stringify(response_data["events"]);
+
         let message;
 
         if("message" in response_data) {
@@ -128,7 +145,9 @@
             message =  response_data;
         }
 
-        append_to_chat(chat_ws_prefix + message, chat_ws_class);
+        new Audio(chat_bling).play();
+
+        append_to_chat(chat_ws_prefix, message, chat_ws_class);
     }
 
 // function for submitting user input
@@ -136,8 +155,11 @@
         event.preventDefault();
 
         // get user input
-        let user_input = ele_chat_field.value;
-        append_to_chat(chat_user_prefix + user_input, chat_user_class);
+        let user_input = {
+            "type": "text_message",
+            "text": ele_chat_field.value
+        };
+        append_to_chat(chat_user_prefix, user_input, chat_user_class);
 
         // create request data
         let request_data = {
@@ -156,6 +178,30 @@
     }
 
 // Append text to chat (with class)
-    const append_to_chat = (text, html_class) => {
-        ele_chat_log.innerHTML += `<div class="${html_class}">${text}</div>`;
+    const append_to_chat = (prefix, message, html_class) => {
+        let message_type = message["type"]
+
+        if(message_type === "text_message") {
+            let text = message["text"].replace(/(?:\r\n|\r|\n)/g, '<br>');;
+            html = `${text}`;
+        }
+        else if(message_type === "audio") {
+            let file_sub_url = message["url"];
+            let file_type = message["file_type"];
+            let audio_ele = `<audio controls class="${chat_audio_class}">
+                        <source src="${res_url}${file_sub_url}" type="${file_type}">
+                        Your browser does not support the audio element.
+                     </audio>`;
+            html = `${audio_ele}`;
+        }
+        else if(message_type === "picture") {
+            let file_sub_url = message["url"];
+            let picture_ele = `<img class="${chat_image_class}" src="${res_url}${file_sub_url}">`;
+            html = `${picture_ele}`
+        }
+        else {
+            html = `unsupported message of type "${message_type}"`;
+        }
+
+        ele_chat_log.innerHTML += `<div class="${html_class}">${prefix} ${html}</div>`;
     };

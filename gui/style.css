@@ -1,6 +1,15 @@
 .ws_message {
   color: #940101;
 }
+
 .you_message {
   color: #4662b4;
+}
+
+.chat_image {
+  width: 100px;
+}
+
+.chat_audio{
+
 }
