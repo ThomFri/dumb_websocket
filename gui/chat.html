@@ -4,6 +4,7 @@
     <title>Chatbot Interface</title>
     <script src="chat.js"></script>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
   </head>
   <body>
     <h1>Simple Chatbot</h1>
@@ -12,11 +13,26 @@
     <u>WS JSON:</u> <span id="ws_json"></span><br>
     <u>Events:</u> <span id="ws_events"></span><br>
     <br>
-    <u>Chat Log:</u><br>
-    <div id="chat_log"></div><br>
-    <form id="chat_form">
-      <label for="chat_field">Input: </label>
-      <input type="text" id="chat_field" autofocus>
-    </form>
+    <div class="card" id="chat_card" style="display: none;">
+      <header class="card-header">
+        <p class="card-header-title">
+          Chat Log
+        </p>
+      </header>
+      <div class="card-content">
+        <div id="chat_log"></div>
+        <form id="chat_form">
+          <label for="chat_field">Input: </label>
+          <input type="text" id="chat_field" autofocus>
+        </form>
+      </div>
+      <footer class="card-footer">
+        <a class="card-footer-item" onclick="toggleChat()">Hide</a>
+        <a class="card-footer-item" onclick="toggleChat()">Close</a>
+      </footer>
+    </div>
+    <button class="button is-info is-rounded" id="chat_button" onclick="toggleChat()">
+      Let's Chat!
+    </button>
   </body>
 </html>

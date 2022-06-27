@@ -205,3 +205,18 @@
 
         ele_chat_log.innerHTML += `<div class="${html_class}">${prefix} ${html}</div>`;
     };
+
+// Toggles visibility off chat and chat_button
+
+    function toggleChat() {
+        var chat = document.getElementById("chat_card");
+        var chat_button = document.getElementById("chat_button");
+        
+        if (chat.style.display === "none") {
+        chat.style.display = "block";
+        chat_button.style.display = "none";
+        } else {
+        chat.style.display = "none";
+        chat_button.style.display = "block";        
+        }
+    } 
