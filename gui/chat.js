@@ -135,7 +135,7 @@
 
         ele_ws_json.innerHTML = event.data;
         ele_ws_events.innerHTML = JSON.stringify(response_data["events"]);
-
+        
         let message;
 
         if("message" in response_data) {
@@ -148,6 +148,9 @@
         new Audio(chat_bling).play();
 
         append_to_chat(chat_ws_prefix, message, chat_ws_class);
+
+        // Wenn als Event close zurückgegeben wird, wird das Chatfenster geschlossen
+        if(response_data["events"].close){toggleChat()}
     }
 
 // function for submitting user input
