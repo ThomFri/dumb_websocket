@@ -223,3 +223,18 @@
         chat_button.style.display = "block";        
         }
     } 
+
+    // Deletes chat content
+    function deleteChat(){
+        document.querySelector("#chat_log").innerHTML = "";
+        toggleChat();
+        // let delete_request = 
+        //     {
+        //         "message": {},
+        //         "other_stuff": {
+        //                     "event": "delete_chat"
+        //         }
+        //     };
+        // if(verbose>0){console.log("Sending delete request to WS:");console.log(JSON.stringify(delete_request));}
+        // socket.send(JSON.stringify(delete_request));
+    }

@@ -18,6 +18,16 @@
         <p class="card-header-title">
           Chat Log
         </p>
+        <button class="card-header-icon" onclick="toggleChat()" aria-label="more options">
+          <span class="icon">
+            <ion-icon name="remove"></ion-icon>
+          </span>
+        </button>
+        <button class="card-header-icon" onclick="deleteChat()" aria-label="more options">
+          <span class="icon">
+            <ion-icon name="trash-bin"></ion-icon>
+          </span>
+        </button>
       </header>
       <div class="card-content" id="chat_card_content">
         <div id="chat_log"></div>
