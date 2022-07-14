@@ -17,7 +17,14 @@
 #chat_card {
   position: fixed;
   bottom: 10px;
-  right: 10px; 
+  right: 10px;
+}
+
+#chat_card_content{
+  height: 300px;
+  overflow: auto;
+  display: flex;
+  flex-direction: column-reverse;
 }
 
 #chat_button {

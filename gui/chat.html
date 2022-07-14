@@ -19,8 +19,10 @@
           Chat Log
         </p>
       </header>
-      <div class="card-content">
+      <div class="card-content" id="chat_card_content">
         <div id="chat_log"></div>
+      </div>
+      <footer class="card-footer">
         <form class="field has-addons" id="chat_form">
           <div class="control">
             <input class="input is-rounded" type="text" id="chat_field" autofocus placeholder="Write something!">
@@ -31,12 +33,8 @@
                 <ion-icon name="send"></ion-icon>
               </span>
             </button>
-        </div>
+          </div>
         </form>
-      </div>
-      <footer class="card-footer">
-        <a class="card-footer-item" onclick="toggleChat()">Hide</a>
-        <a class="card-footer-item" onclick="toggleChat()">Close</a>
       </footer>
     </div>
     <button class="button is-info is-rounded" id="chat_button" onclick="toggleChat()">
