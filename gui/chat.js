@@ -185,7 +185,7 @@
         let message_type = message["type"]
 
         if(message_type === "text_message") {
-            let text = message["text"].replace(/(?:\r\n|\r|\n)/g, '<br>');;
+            let text = message["text"].replace(/(?:\r\n|\r|\n)/g, '<br>');
             html = `${text}`;
         }
         else if(message_type === "audio") {
@@ -206,7 +206,14 @@
             html = `unsupported message of type "${message_type}"`;
         }
 
-        ele_chat_log.innerHTML += `<div class="${html_class}">${prefix} ${html}</div>`;
+        ele_chat_log.innerHTML += 
+        `<div class="${html_class}">
+            <article class="message ${prefix==='WS: ' ? 'is-info' : 'is-warning' }">
+                <div class="message-body">
+                    ${html}
+                </div>
+            </article>
+        </div>`;
     };
 
 // Toggles visibility off chat and chat_button
