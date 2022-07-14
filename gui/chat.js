@@ -199,7 +199,11 @@
         }
         else if(message_type === "picture") {
             let file_sub_url = message["url"];
-            let picture_ele = `<img class="${chat_image_class}" src="${res_url}${file_sub_url}">`;
+            let picture_ele = `
+            <a href="${res_url}${file_sub_url}"  target="_blank">
+                <image class="${chat_image_class} is-clickable" src="${res_url}${file_sub_url}">
+            <a/>
+            `;
             html = `${picture_ele}`
         }
         else {
