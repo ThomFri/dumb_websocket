@@ -212,7 +212,7 @@
 
         ele_chat_log.innerHTML += 
         `<div class="${html_class}">
-            <article class="message ${prefix==='WS: ' ? 'is-info' : 'is-warning' }">
+            <article class="message ${getColor(prefix)}">
                 <div class="message-body">
                     ${html}
                 </div>
@@ -227,11 +227,13 @@
         var chat_button = document.getElementById("chat_button");
         
         if (chat.style.display === "none") {
-        chat.style.display = "block";
-        chat_button.style.display = "none";
+            chat.style.display = "block";
+            chat_button.style.display = "none";
         } else {
-        chat.style.display = "none";
-        chat_button.style.display = "block";        
+            let message = {type: 'text_message', text: 'You have closed the chat.'};
+            append_to_chat( '', message , '');
+            chat.style.display = "none";
+            chat_button.style.display = "block";        
         }
     } 
 
@@ -248,4 +250,12 @@
         //     };
         // if(verbose>0){console.log("Sending delete request to WS:");console.log(JSON.stringify(delete_request));}
         // socket.send(JSON.stringify(delete_request));
+    }
+
+    function getColor(prefix){
+        switch (prefix){
+            case 'WS: ': return 'is-info'
+            case 'You: ': return 'is-warning'
+            default: return ''
+        }
     }
